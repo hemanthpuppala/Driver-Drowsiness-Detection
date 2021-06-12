@@ -1,11 +1,14 @@
+
 import cv2
 import datetime
 
 face_classifier=cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 eye_classifier=cv2.CascadeClassifier("haarcascade_eye.xml")
 watch_cascade = cv2.CascadeClassifier('watchcascade10stage.xml')
-
-video=cv2.VideoCapture(0)
+car_cascade = cv2.CascadeClassifier('cars.xml')
+video=cv2.VideoCapture('object.mp4')
+phone_cascade=cv2.CascadeClassifier('Phone_Cascade.xml')
+wall_cascade=cv2.CascadeClassifier('classifier WallClock.xml')
 
 while True:
     
@@ -14,29 +17,35 @@ while True:
     gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
 
-    faces=face_classifier.detectMultiScale(gray,1.3,5)
-    eyes=eye_classifier.detectMultiScale(gray,1.3,5)
-    watches = watch_cascade.detectMultiScale(gray, 1.5, 20)
-    print(faces)
+    watches = watch_cascade.detectMultiScale(gray, 1.5, 50)
+    cars = car_cascade.detectMultiScale(gray, 1.1, 1)
+    phones=phone_cascade.detectMultiScale(gray, 3, 9)
+    clock=wall_cascade.detectMultiScale(gray, 3, 9)
+
+
+    print(watches)
+
+    for (px,py,pw,ph) in phones:
+        cv2.rectangle(frame, (px,py), (px+pw, py+ph), (255,0,255), 2)
+        cv2.imshow('object detection', frame)
+
+    for (bx,by,bw,bh) in clock:
+        cv2.rectangle(frame, (bx,by), (bx+bw, by+bh), (255,10,255), 2)
+        cv2.imshow('object detection', frame)
+    
+
 
     for (ax,ay,aw,ah) in watches:
           cv2.circle(frame, (int(ax+ah/2),int(ay+aw/2)), 30, (0,100,255), 2)
-          cv2.imshow('Face detection', frame)
-        
-    
-    for(x,y,w,h) in faces:
-        
-        cv2.circle(frame,(int(x+h/2),int(y+w/2)),130,(255,0,255),4)
-        cv2.imshow('Face detection', frame)
-        
-       
-        
-  
-    for(ex,ey,ew,eh) in eyes:
-        cv2.circle(frame, (int(ex+eh/2),int(ey+ew/2)), 25, (127,0,255), 2)
-        cv2.imshow('Face detection', frame)
-        picname=datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
-        cv2.imwrite(picname+".jpg",frame)
+          cv2.imshow('object detection', frame)
+
+    for (cx,cy,cw,ch) in cars:
+          cv2.rectangle(frame, (cx,cy),(cx+cw,cy+ch),(0,0,255),2)
+          
+          cv2.imshow('object detection', frame)     
+         
+          picname=datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
+          cv2.imwrite(picname+".jpg",frame)
    
     Key=cv2.waitKey(1)
     if Key==ord('q'):
